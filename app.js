@@ -25,14 +25,23 @@ app.use(
     schema: buildSchema(`
 
     type Recipe {
-      _id: ID!
+      _id:ID!
       name: String!
-      description: String!
+      description: String
+      instructions: String
+      image: String
+      ingredients:[String]
+      quantities:[String]
+
     }
 
     input RecipeInput {
       name: String!
-      description: String!
+      description: String
+      instructions: String
+      image: String
+      ingredients:[String]
+      quantities:[String]
     }
 
   type RootQuery{
@@ -54,13 +63,15 @@ app.use(
       //These must have the same names as the RootQuery and RootMutations above
       //These are really just functions that correspond to the list above
       recipes: () => {
-        Recipe.find()
+        return Recipe.find()
           .then((recipes) => {
-          return recipes 
+            return recipes.map((recipe) => {
+              return {...recipe._doc}
+            })
           })
           .catch((error) => {
-          console.log(error)
-        })
+            console.log(error);
+          });
       },
       createRecipe: (args) => {
         const recipe = new Recipe({
@@ -69,18 +80,18 @@ app.use(
           instructions: args.recipeInput.instructions,
           image: args.recipeInput.image,
           ingredients: args.recipeInput.ingredients,
-          quantities: args.recipeInput.quantities
-        })
+          quantities: args.recipeInput.quantities,
+        });
         return recipe
           .save()
           .then((result) => {
-            console.log(result)
-            return {...result._doc}
+            console.log(result);
+            return { ...result._doc };
           })
           .catch((error) => {
-            console.log(error)
-            throw error 
-        })
+            console.log(error);
+            throw error;
+          });
       },
     },
     graphiql: true,

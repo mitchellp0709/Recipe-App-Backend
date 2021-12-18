@@ -9,7 +9,7 @@ const recipeSchema = new Schema({
   },
   description: {
     type: String, 
-    required: true, 
+    
   },
   
   instructions: { type: String },
@@ -24,4 +24,4 @@ const recipeSchema = new Schema({
   
 )
 
-module.exports = mongoose.model("Recipe", recipeSchema)
+module.exports = mongoose.model('Recipe', recipeSchema)
