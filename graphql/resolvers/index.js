@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const Recipe = require('../../models/recipe')
 const User = require('../../models/user')
+const jwt = require('jsonwebtoken')
 
 
 ////////////////////////////////////
@@ -27,12 +28,14 @@ const recipes = async (recipeIds) => {
     return recipes.map((recipe) => {
       return { ...recipe._doc, creator: user(recipe.creator) };
     })
-    //return recipes
   } catch(error) {
       throw error;
     };
 };
 
+const transformRecipe = ((recipe) => {
+  return {...recipe._doc, creator: user(recipe._doc.creator)}
+})
 
 ////////////////////////////////////
 // Resolvers
@@ -49,7 +52,7 @@ module.exports = {
     return Recipe.find()
       .then((recipes) => {
         return recipes.map((recipe) => {
-          return { ...recipe._doc, creator: user(recipe._doc.creator) };
+          return transformRecipe(recipe)
         });
       })
       .catch((error) => {
@@ -60,7 +63,10 @@ module.exports = {
     return User.find({});
   },
 
-  createRecipe: (args) => {
+  createRecipe: (args, req) => {
+    if (req.isAuth == false) {
+      throw new Error('Not Logged In')
+    }
     const recipe = new Recipe({
       name: args.recipeInput.name,
       description: args.recipeInput.description,
@@ -68,13 +74,13 @@ module.exports = {
       image: args.recipeInput.image,
       ingredients: args.recipeInput.ingredients,
       quantities: args.recipeInput.quantities,
-      creator: "61be45b073fd39c6719f4193",
+      creator: req.userId,
     })
     return recipe
       .save()
       .then((result) => {
-        createdEvent = { ...result._doc, creator: user(result._doc.creator) };
-        return User.findById("61be45b073fd39c6719f4193");
+        createdEvent = transformRecipe(result);
+        return User.findById(req.userId);
       })
       .then((user) => {
         user.createdRecipes.push(recipe);
@@ -105,4 +111,16 @@ module.exports = {
         throw error;
       });
   },
+  login: async ({ username, password }) => {
+    const user = await User.findOne({ username: username });
+    if (user==undefined) {
+      throw new Error("User does not exist");
+    }
+    const isEqual = await bcrypt.compare(password, user.password);
+    if (isEqual==false) {
+      throw new Error("Password is incorrect")
+    }
+    const token = jwt.sign({ userId: user._id, username: user.username }, 'IROH')
+    return{userId: user._id, token: token, }
+  }
 };

@@ -13,12 +13,15 @@ require("dotenv").config()
 const DATABASE_URL = process.env.DATABASE_URL
 const graphQlSchema = require("./graphql/schema/index")
 const graphQlResolvers = require('./graphql/resolvers/index')
+const isAuth = require('./middleware/auth')
 
 
 ////////////////////////////////////
 // Routes
 ////////////////////////////////////
 
+
+app.use(isAuth)
 
 app.use(
   "/graphql",

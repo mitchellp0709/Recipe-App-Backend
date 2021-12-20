@@ -20,6 +20,11 @@ module.exports = buildSchema(`
       createdRecipes: [Recipe!]
     }
 
+    type AuthData{
+      userId: ID!
+      token: String!
+    }
+
     input RecipeInput {
       name: String!
       description: String
@@ -37,6 +42,7 @@ module.exports = buildSchema(`
   type RootQuery{
     recipes: [Recipe!]!
     users:[User!]!
+    login(username: String!, password: String!): AuthData!
   }
 
   type RootMutation {
