@@ -9,6 +9,9 @@ const jwt = require('jsonwebtoken')
 ////////////////////////////////////
 
 
+
+
+
 const user = (id) => {
   return User.findById(id)
     .then((user) => {
@@ -64,9 +67,9 @@ module.exports = {
   },
 
   createRecipe: (args, req) => {
-    if (req.isAuth == false) {
-      throw new Error('Not Logged In')
-    }
+    // if (req.isAuth == false) {
+    //   throw new Error('Not Logged In')
+    // }
     const recipe = new Recipe({
       name: args.recipeInput.name,
       description: args.recipeInput.description,
@@ -79,7 +82,7 @@ module.exports = {
     return recipe
       .save()
       .then((result) => {
-        createdEvent = transformRecipe(result);
+        createdRecipe = transformRecipe(result);
         return User.findById(req.userId);
       })
       .then((user) => {
@@ -87,7 +90,7 @@ module.exports = {
         return user.save();
       })
       .then((result) => {
-        return createdEvent;
+        return createdRecipe;
       })
       .catch((error) => {
         console.log(error);
