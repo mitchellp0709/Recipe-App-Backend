@@ -21,16 +21,16 @@ const user = (id) => {
     });
 };
 
-const recipes = (recipeIds) => {
-  return Recipe.find({ _id: { $in: recipeIds } })
-    .then((recipes) => {
-      return recipes.map((recipe) => {
-        return { ...recipe._doc, creator: user(recipe.creator) };
-      });
+const recipes = async (recipeIds) => {
+  try{
+    const recipes = await Recipe.find({ _id: { $in: recipeIds } })
+    return recipes.map((recipe) => {
+      return { ...recipe._doc, creator: user(recipe.creator) };
     })
-    .catch((error) => {
+    //return recipes
+  } catch(error) {
       throw error;
-    });
+    };
 };
 
 
